@@ -1,12 +1,8 @@
-![GitHub Repo Size](https://img.shields.io/github/repo-size/anshuldass/01.SQL/?style=flat-square)
-![GitHub Issues](https://img.shields.io/github/issues/anshuldass/01.SQL/?style=flat-square)
-![GitHub Pull Requests](https://img.shields.io/github/issues-pr/anshuldass/01.SQL/?style=flat-square)
+<!-- Technology / Version -->
 ![SQL Server Version](https://img.shields.io/badge/SQL_Server-2019-blue?style=flat-square)
-![Workflow Status](https://img.shields.io/github/actions/workflow/status/anshuldass/01.SQL/main.yml?style=flat-square)
-
 # SQL Practice Repository
 
-Welcome to the **SQL Practice** repository! This repository is designed for SQL enthusiasts, data engineers, and analysts who want to practice and improve their SQL skills using real-world scenarios and datasets.
+Welcome to the **01.SQL** repository! This repository is designed for SQL enthusiasts, data engineers, and analysts who want to practice and improve their SQL skills using real-world scenarios and datasets.
 
 ---
 
@@ -54,3 +50,10 @@ You can download AdventureWorks from the official Microsoft site: [AdventureWork
 git clone https://github.com/anshuldass/01.SQL.git
 cd 01.SQL
 ```
+![GitHub Repo Size](https://img.shields.io/github/repo-size/anshuldass/01.SQL?style=flat-square)
+![GitHub Issues](https://img.shields.io/github/issues/anshuldass/01.SQL?style=flat-square)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/anshuldass/01.SQL?style=flat-square)
+![GitHub Stars](https://img.shields.io/github/stars/anshuldass/01.SQL?style=flat-square)
+![GitHub Forks](https://img.shields.io/github/forks/anshuldass/01.SQL?style=flat-square)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/anshuldass/01.SQL?style=flat-square)
+![License](https://img.shields.io/github/license/anshuldass/01.SQL?style=flat-square)
