@@ -50,7 +50,7 @@ You can download AdventureWorks from the official Microsoft site: [AdventureWork
 git clone https://github.com/anshuldass/01.SQL.git
 cd 01.SQL
 ```
-![GitHub Repo Size](https://img.shields.io/github/repo-size/anshuldass/01.SQL?style=flat-square)
+![GitHub Repo Size](https://img.shields.io/github/repo-size/anshuldass/01.SQL/?style=flat-square)
 ![GitHub Issues](https://img.shields.io/github/issues/anshuldass/01.SQL?style=flat-square)
 ![GitHub Pull Requests](https://img.shields.io/github/issues-pr/anshuldass/01.SQL?style=flat-square)
 ![GitHub Stars](https://img.shields.io/github/stars/anshuldass/01.SQL?style=flat-square)
