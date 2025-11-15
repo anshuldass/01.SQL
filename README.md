@@ -56,6 +56,6 @@ cd 01.SQL
 ![GitHub Stars](https://img.shields.io/github/stars/anshuldass/01.SQL?style=flat-square)
 ![GitHub Forks](https://img.shields.io/github/forks/anshuldass/01.SQL?style=flat-square)
 ![GitHub Last Commit](https://img.shields.io/github/last-commit/anshuldass/01.SQL?style=flat-square)
-![License](https://img.shields.io/github/license/anshuldass/01.SQL?style=flat-square)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+<!-- ![License](https://img.shields.io/github/license/anshuldass/01.SQL?style=flat-square) -->
 
