@@ -1,0 +1,33 @@
+USE [AdventureWorks2022]
+GO
+
+/****** Object:  StoredProcedure [dbo].[sp_DeleteOlderOrders]    Script Date: 11/16/2025 9:42:52 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE OR ALTER   PROCEDURE [dbo].[sp_DeleteOlderOrders]
+	@SelDate DATETIME
+AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE @SQL NVARCHAR(MAX);
+	SET @SQL = N'DELETE FROM Sales.SalesOrderHeader WHERE ORDERDATE >=@SelDateParam' 
+	BEGIN TRY
+		BEGIN TRANSACTION;
+		EXEC SP_EXECUTESQL @SQL,
+		 N'@SelDateParam DATETIME',
+         @SelDateParam = @SelDate;
+		COMMIT TRANSACTION;
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRANSACTION;
+		PRINT 'ERROR' + ERROR_MESSAGE();
+	END CATCH
+END;
+
+GO
+
+--EXEC sp_DeleteOlderOrders '2014-06-30'

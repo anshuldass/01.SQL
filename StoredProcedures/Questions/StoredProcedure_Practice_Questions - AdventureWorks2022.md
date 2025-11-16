@@ -61,11 +61,19 @@
 13. **Dynamic Table Fetch:**
     - Procedure accepts `TableName` and returns top 10 rows dynamically from that table.
 
-14. **Update Product Price:**
+14. **Updat Price:**
     - Procedure accepts `ProductID` and `NewPrice` and updates the `ListPrice` of the product.
 
 15. **Insert New Customer:**
-    - Procedure accepts `FirstName`, `LastName`, `Email` and inserts a new record into `Person.Person` and related `Sales.Customer` table.
+    - Create a stored procedure that inserts a new customer into two simpler tables:
+    -- Customer table
+    CREATE TABLE dbo.Customer
+    (
+        CustomerID INT IDENTITY(1,1) PRIMARY KEY,
+        FirstName NVARCHAR(50),
+        LastName NVARCHAR(50),
+        Email NVARCHAR(50)
+    );
 
 16. **Delete Old Orders:**
     - Procedure deletes orders older than a given date, accepts `CutoffDate` as input, includes transaction and error handling.
@@ -77,7 +85,7 @@
     - Procedure accepts `SalesTerritoryID` and returns total sales, total orders, and average order amount.
 
 19. **Parameter Sniffing Prevention:**
-    - Create a procedure with `OPTION (RECOMPILE)` to handle dynamic filtering on `ProductCategoryID` and `ListPrice`.
+    - Create a procedure with `OPTION (RECOMPILE)` to handle dynamic filtering on `ProductSubCategoryID` and `ListPrice`.
 
 20. **ETL Style Load to Staging:**
     - Procedure truncates a staging table and loads product data from `Production.Product` with transaction and error handling.
