@@ -1,7 +1,7 @@
 USE [AdventureWorks2022]
 GO
 
-/****** Object:  UserDefinedFunction [dbo].[HighValueCustomer]    Script Date: 11/17/2025 7:34:51 PM ******/
+/****** Object:  UserDefinedFunction [dbo].[HighValueCustomer]    Script Date: 11/17/2025 7:41:19 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -13,10 +13,12 @@ RETURNS NVARCHAR(3)
 AS
 BEGIN
 	DECLARE @Result NVARCHAR(3), @Sale DECIMAL(10,2);
-	SET @Sale =	(SELECT SUM(TotalDue) AS TotalSales	
+	SET @Sale =	(
+		SELECT 
+			COALESCE(SUM(TotalDue),0) AS TotalSales	
 		FROM Sales.SalesOrderHeader
 		WHERE CustomerID = @CustomerID
-		GROUP BY CustomerID)
+		)
 	IF @Sale > 50000.0
 		SET @Result = 'Yes'
 	ELSE 
