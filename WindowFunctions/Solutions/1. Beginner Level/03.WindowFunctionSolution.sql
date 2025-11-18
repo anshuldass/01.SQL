@@ -1,0 +1,6 @@
+SELECT 
+	ProductID,
+	Name AS ProductName,
+	ProductNumber,
+	DENSE_RANK() OVER (ORDER BY CASE WHEN WEIGHT IS NULL THEN 1 ELSE 0 END, WEIGHT) AS RN
+FROM Production.Product 
