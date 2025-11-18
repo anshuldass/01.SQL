@@ -93,6 +93,3 @@ For SalesOrderDetail, compute:
 Identify orders where the last line deviates from the moving average by > 2 standard deviations.
 
 ---
-
-## Want solutions?
-A complete solutions file or a hints-only version can be created when needed.
