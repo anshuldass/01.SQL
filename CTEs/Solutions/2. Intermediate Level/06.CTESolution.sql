@@ -1,0 +1,8 @@
+WITH CTE AS(
+	SELECT
+		CustomerID,
+		TotalDue,
+		ROW_NUMBER() OVER (PARTITION BY CustomerID ORDER BY TotalDue DESC) AS RN
+	FROM Sales.SalesOrderHeader
+)
+SELECT * FROM CTE WHERE RN = 1;

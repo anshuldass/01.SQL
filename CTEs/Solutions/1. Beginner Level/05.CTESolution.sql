@@ -1,0 +1,7 @@
+WITH CTE AS(
+	SELECT 
+		TotalDue,
+		ROW_NUMBER() OVER(ORDER BY TotalDue DESC) AS RN
+	FROM Sales.SalesOrderHeader
+)
+SELECT * FROM CTE WHERE RN <= 10;
