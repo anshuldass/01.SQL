@@ -20,15 +20,33 @@ The goal of this repository is to provide:
 ## 🗂 Repository Structure
 ```
 01.SQL/
+├── CTEs/
+│   ├── Questions/
+│   └── Solutions/
+│       ├── 1. Beginner Level/
+│       └── 2. Intermediate Level/
+│       └── 3. Intermediate Level/
+│       └── 4. Expert Level - Data Engineering/
+
 ├── StoredProcedures/
 │   ├── Questions/
 │   └── Solutions/
 │       ├── 1. Beginner Level/
 │       └── 2. Intermediate Level/
+├──UserDefinedFunctions/
+│   ├── Questions/
+│   └── Solutions/
+│       ├── 1. Beginner Level/
+│       └── 2. Intermediate Level/
+│       └── 3. Advanced Level/
+├──WindowFunctions/
+│   ├── Questions/
+│   └── Solutions/
+│       ├── 1. Beginner Level/
+│       └── 2. Intermediate Level/
+│       └── 3. Intermediate Level/
+│       └── 4. Expert Level - Data Engineering/
 ```
-
-
----
 
 ## 🛠 Prerequisites
 
