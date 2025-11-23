@@ -42,9 +42,9 @@ Concatenate `AddressLine1`, `City`, and `PostalCode` into a single readable addr
 
 In `Sales.CreditCard`, display only the last 4 digits of the card number, masking the rest.
 
-### **9. Extract Product Size Unit**
+### **9. Extract Product Color Code**
 
-From `Production.Product`, extract the unit part of the `Size` field when it contains text like `50 CM` or `20 L`.
+From `Production.Product`, extract the **Color** field's first three characters (e.g., "Red" → "Red", "Silver" → "Sil"). Return products where the Color field is not NULL.
 
 ### **10. Validate Phone Numbers**
 
@@ -68,9 +68,9 @@ from `Sales.SalesTerritory.Name`.
 
 Group cities from `Person.Address` by their **starting letter** and return counts for each.
 
-### **14. Detect Abbreviations in Product Names**
+### **Question 14 — Detect Numeric Suffixes in Product Numbers**
 
-Identify product names containing uppercase sequences (like "XL", "GPS", "HD").
+**Identify products whose `ProductNumber` ends with a numeric suffix (for example: `…-42`, `…-300`, `…-700`). Extract the numeric ending and return it as a separate column.**
 
 ### **15. Generate URL Slugs for Product Names**
 
@@ -78,7 +78,6 @@ Turn product names into web-friendly slugs:
 
 - lowercase
 - spaces replaced with hyphens
-- remove non-alphanumeric characters
 
 ### **16. Extract Model Series**
 
