@@ -83,9 +83,9 @@ Turn product names into web-friendly slugs:
 
 From `ProductNumber`, extract the **middle section** (e.g., `M68B` from `BK-M68B-42`).
 
-### **17. Fuzzy Product Search Using SOUNDEX**
+### 17.Extract Name
 
-Find products whose names sound similar to a given input term (e.g., "helmet").
+Extract the first word from `Product.Name` (e.g., from `"HL Road Frame – Black"` → `"HL"`) using T-SQL string functions.
 
 ### **18. Detect Product Colors Embedded in Name**
 
