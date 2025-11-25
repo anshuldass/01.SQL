@@ -45,7 +45,7 @@ From `Sales.SalesOrderHeader`, calculate a follow-up date 30 days after `OrderDa
 ## 🔵 Advanced Level
 
 ### **11. Customer Age Calculation**
-From `Person.Person`, calculate each customer's age based on `BirthDate`.
+From `HumanResources.Employee`, calculate each customer's age based on `BirthDate`.
 
 ### **12. Days Since Last Purchase**
 From `Sales.SalesOrderHeader`, compute the number of days since the last `OrderDate` for each customer.
@@ -73,7 +73,3 @@ Calculate year-over-year growth in `TotalDue` for each year.
 
 ### **20. Calculate Quarter of Order**
 From `OrderDate`, calculate which **quarter** each order belongs to.
-
----
-
-Next, we can move on to **practice problems for conversion, NULL handling, and conditional functions** if you want to continue the series.

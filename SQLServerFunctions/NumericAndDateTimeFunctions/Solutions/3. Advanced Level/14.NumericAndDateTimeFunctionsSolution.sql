@@ -1,0 +1,4 @@
+SELECT 
+	OrderDate,
+	AVG(TotalDue) OVER(ORDER BY OrderDate ROWS BETWEEN 6 PRECEDING AND CURRENT ROW ) AS MovingAvg
+FROM Sales.SalesOrderHeader;
