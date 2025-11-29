@@ -306,3 +306,79 @@ ON Hist.DepartmentID = HRD.DepartmentID
 WHERE Hist.RN=1;
 
 /*Find three most expensive products per category.*/
+WITH CTE AS (
+SELECT 
+	ProductID,
+	PP.Name AS ProductName,
+	ListPrice,
+	DENSE_RANK() OVER (PARTITION BY PPC.ProductCategoryID ORDER BY ListPrice DESC) AS RN
+FROM Production.Product PP
+INNER JOIN Production.ProductSubcategory PSB
+ON PP.ProductSubcategoryID = PSB.ProductSubcategoryID
+INNER JOIN Production.ProductCategory PPC
+ON PSB.ProductCategoryID = PPC.ProductCategoryID
+)
+SELECT * FROM CTE
+WHERE RN<=3;
+
+/*Display year-over-year growth in sales amount.*/
+WITH CTE AS(
+SELECT 
+	YEAR(OrderDate) AS YR,
+	SUM(TotalDue) AS TotalSales
+FROM Sales.SalesOrderHeader
+GROUP BY YEAR(OrderDate)
+)
+SELECT 
+	*,
+	CASE WHEN PrevTotalSales IS NOT NULL THEN
+	((TotalSales - PrevTotalSales)/PrevTotalSales) * 100
+	END AS [Growth%]
+FROM (
+	SELECT 
+		*,
+		LAG(TotalSales) OVER(ORDER BY YR) AS PrevTotalSales
+	FROM CTE
+	)AS T;
+
+/*Show each product with the percentage contribution of its sales to total product sales.*/
+WITH CTE AS(
+SELECT 
+	PP.ProductID,
+	PP.Name AS ProductName,
+	SUM(SSOD.LineTotal) AS TotalSales
+FROM Sales.SalesOrderHeader SSOH
+INNER JOIN Sales.SalesOrderDetail SSOD
+ON SSOH.SalesOrderID = SSOD.SalesOrderID
+INNER JOIN Production.Product PP
+ON SSOD.ProductID = PP.ProductID
+GROUP BY PP.ProductID,PP.Name
+),
+CTE1 AS (
+	SELECT 
+		SUM(LineTotal) AS GrandTotal
+	FROM Sales.SalesOrderDetail
+)
+SELECT 
+	*,
+	(TotalSales / GrandTotal)*100 AS SalesPercentage
+FROM CTE C
+CROSS JOIN CTE1 C1;
+
+/*Identify the most recent purchase date per vendor.*/
+WITH CTE AS(
+SELECT 
+	PPOH.VendorID,
+	PV.Name AS VendorName,
+	PPOH.OrderDate,
+	ROW_NUMBER() OVER (PARTITION BY PPOH.VendorID ORDER BY PPOH.OrderDate DESC) AS LatestOrder
+FROM Purchasing.PurchaseOrderHeader PPOH
+INNER JOIN Purchasing.Vendor PV
+ON PPOH.VendorID = PV.BusinessEntityID
+)
+SELECT 
+	VendorID,
+	VendorName,
+	OrderDate AS LatestOrderDate
+FROM CTE
+WHERE LatestOrder = 1;
