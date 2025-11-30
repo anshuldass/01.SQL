@@ -602,3 +602,76 @@ WHERE NOT EXISTS (
       AND SSOH.OrderDate > DATEADD(DAY, -120, GETDATE())
 )
 ORDER BY P.ProductID;
+
+/*Detect product price anomalies: ListPrice far from Vendor average price.*/
+WITH CTE1 AS(
+SELECT 
+	ProductID,
+	AVG(StandardPrice) AS AVG_VENDOR_PRICE 
+FROM Purchasing.ProductVendor
+GROUP BY ProductID
+),
+CTE2 AS (
+	SELECT PP.ProductID,
+		PP.NAME AS ProductName,
+		PP.ListPrice,
+		C.AVG_VENDOR_PRICE
+	FROM Production.Product PP 
+	INNER JOIN CTE1 C
+	ON PP.ProductID = C.ProductID
+	WHERE C.AVG_VENDOR_PRICE > PP.ListPrice
+) SELECT * FROM CTE2;
+
+/*Build a contact directory joining phone, email, and address tables.*/
+
+SELECT 
+	PP.BusinessEntityID,
+	DBO.ufnFullNameFormatter(PP.FirstName,PP.MiddleName,PP.LastName) AS FullName,
+	PPP.PhoneNumber,
+	PEA.EmailAddress,
+	PA.AddressLine1,
+	PA.AddressLine2,
+	PA.City,
+	PA.PostalCode
+FROM Person.Person PP
+INNER JOIN Person.BusinessEntityAddress PBEA
+ON PP.BusinessEntityID = PBEA.BusinessEntityID
+INNER JOIN PERSON.Address PA
+ON PBEA.AddressID = PA.AddressID
+INNER JOIN Person.EmailAddress PEA
+ON PP.BusinessEntityID = PEA.BusinessEntityID
+INNER JOIN Person.PersonPhone PPP
+ON PP.BusinessEntityID = PPP.BusinessEntityID
+ORDER BY BusinessEntityID;
+
+/*Identify vendors who consistently delivered late (average lead time> 20 days).*/
+WITH VendorLeadTime AS (
+    SELECT 
+        PV.BusinessEntityID AS VendorID,
+        V.Name AS VendorName,
+        DATEDIFF(DAY, POH.OrderDate, POH.ShipDate) AS LeadTime
+    FROM Purchasing.PurchaseOrderHeader POH
+    INNER JOIN Purchasing.ProductVendor PV
+        ON POH.VendorID = PV.BusinessEntityID
+    INNER JOIN Purchasing.Vendor V
+        ON PV.BusinessEntityID = V.BusinessEntityID
+    WHERE POH.ShipDate IS NOT NULL
+)
+SELECT 
+    VendorID,
+    VendorName,
+    AVG(CAST(LeadTime AS FLOAT)) AS AvgLeadTime
+FROM VendorLeadTime
+GROUP BY VendorID, VendorName
+HAVING AVG(CAST(LeadTime AS FLOAT)) > 20
+ORDER BY AvgLeadTime DESC;
+
+/*Compute customer lifetime value including total purchases, first purchase date, and last purchase date.*/
+SELECT
+    CustomerID,
+    SUM(TotalDue) AS TotalSales,
+    MIN(OrderDate) AS FirstOrderDate,
+    MAX(OrderDate) AS LastOrderDate
+FROM Sales.SalesOrderHeader
+GROUP BY CustomerID
+ORDER BY CustomerID;
