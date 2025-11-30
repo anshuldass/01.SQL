@@ -1,4 +1,4 @@
-/*List all products with their name, color, and list price. Show only
+﻿/*List all products with their name, color, and list price. Show only
 products with a non-null color.*/
 
 SELECT NAME, Color,ListPrice FROM Production.Product
@@ -382,3 +382,223 @@ SELECT
 	OrderDate AS LatestOrderDate
 FROM CTE
 WHERE LatestOrder = 1;
+
+/*Show products discontinued (SellEndDate \< GETDATE()).*/
+SELECT * FROM Production.Product
+WHERE SellEndDate <=GETDATE();
+
+/*Find the longest gap (in days) between successive orders for any customer.*/
+WITH CTE AS(
+		SELECT
+			CustomerID,
+			OrderDate,
+			LAG(OrderDate) OVER (PARTITION BY CustomerID ORDER BY OrderDate) AS PrevOrderDate
+		FROM Sales.SalesOrderHeader
+)
+SELECT TOP 1
+	MAX(DifferenceInDays) AS MAX_Gap
+	FROM (
+	SELECT 
+		*,
+		DATEDIFF(DAY,PrevOrderDate,OrderDate) AS DifferenceInDays
+	FROM CTE) AS T
+	GROUP BY CustomerID
+	ORDER BY MAX_Gap DESC;
+
+/*Identify repeat customers who placed orders in at least 3 distinct years.*/
+SELECT 
+    CustomerID
+FROM Sales.SalesOrderHeader
+GROUP BY CustomerID
+HAVING COUNT(DISTINCT YEAR(OrderDate)) >= 3
+ORDER BY CustomerID;
+
+/*Write a CTE to list all products and flag whether their sales volume is above the median.*/
+WITH ProductSales AS (
+    SELECT 
+        ProductID,
+        SUM(OrderQty) AS TotalSales
+    FROM Sales.SalesOrderDetail
+    GROUP BY ProductID
+),
+
+MedianValue AS (
+    SELECT 
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY TotalSales) 
+        OVER () AS MedianSales
+    FROM ProductSales
+)
+
+SELECT 
+    p.ProductID,
+    p.TotalSales,
+    CASE 
+        WHEN p.TotalSales > m.MedianSales THEN 'Above Median'
+        ELSE 'Below or Equal Median'
+    END AS SalesFlag
+FROM ProductSales p
+CROSS JOIN (SELECT DISTINCT MedianSales FROM MedianValue) m
+ORDER BY p.TotalSales DESC;
+
+/*List employees whose vacation hours are below the company average.*/
+WITH CTE1 AS (
+SELECT 
+	AVG(VacationHours) AS AvgVacationComp
+FROM HumanResources.Employee
+),
+CTE2 AS (
+	SELECT 
+		BusinessEntityID,
+		VacationHours
+	FROM HumanResources.Employee
+)
+SELECT * 
+FROM CTE2 
+WHERE VacationHours < (SELECT AvgVacationComp FROM CTE1);
+
+/*Retrieve the month with the highest total sales in each year.*/
+WITH CTE AS(
+SELECT 
+	YEAR(OrderDate) AS YR,
+	MONTH(OrderDate) AS MN,
+	SUM(TotalDue) AS TotalSales
+FROM Sales.SalesOrderHeader
+GROUP BY MONTH(OrderDate),YEAR(OrderDate)
+)
+SELECT * FROM (
+SELECT 
+	YR,
+	MN,
+	TotalSales,
+	ROW_NUMBER() OVER (PARTITION BY YR ORDER BY TOTALSALES DESC) AS RN
+FROM CTE
+) AS T
+WHERE RN =1;
+
+/*Find discontinued products that still have active vendors.*/
+SELECT 
+	PP.ProductID,
+	PP.Name AS ProductName,
+	PV.Name AS ProductVendor
+FROM Production.Product PP
+INNER JOIN Purchasing.ProductVendor PPV
+ON PP.ProductID = PPV.ProductID
+INNER JOIN Purchasing.Vendor PV
+ON PPV.BusinessEntityID = PV.BusinessEntityID
+WHERE PV.ActiveFlag = 1
+AND PP.SellEndDate <=GETDATE() 
+AND PP.SellEndDate IS NOT NULL;
+
+/*Show vendors who supplied at least 5 different products.*/
+SELECT 
+	PV.BusinessEntityID AS ProductVendor
+FROM Production.Product PP
+INNER JOIN Purchasing.ProductVendor PPV
+ON PP.ProductID = PPV.ProductID
+INNER JOIN Purchasing.Vendor PV
+ON PPV.BusinessEntityID = PV.BusinessEntityID
+GROUP BY PV.BusinessEntityID
+HAVING COUNT(DISTINCT PP.ProductID)>=5;
+
+/*Identify products with mismatched weight units (WeightUnitMeasureCode not found in `UnitMeasure`).*/
+SELECT * FROM Production.Product
+WHERE WeightUnitMeasureCode NOT IN(SELECT DISTINCT UnitMeasureCode FROM Production.UnitMeasure);
+
+/*Return orders where the tax amount is unusually high (greater than 2 standard deviations from mean).*/
+WITH TaxStats AS (
+    SELECT 
+        AVG(TaxAmt) AS AvgTax,
+        STDEV(TaxAmt) AS StdTax
+    FROM Sales.SalesOrderHeader
+)
+SELECT 
+    SalesOrderID,
+    OrderDate,
+    TaxAmt
+FROM Sales.SalesOrderHeader s
+CROSS JOIN TaxStats t
+WHERE TaxAmt > t.AvgTax + 2 * t.StdTax
+ORDER BY TaxAmt DESC;
+
+/*Detect customers with overlapping orders (order dates too close---within 1 day).*/
+WITH CTE AS(
+SELECT 
+	CustomerID,
+	OrderDate
+FROM Sales.SalesOrderHeader
+)
+SELECT * FROM (
+SELECT 
+	*,
+	LAG(OrderDate) OVER (PARTITION BY CUSTOMERID ORDER BY ORDERDATE) AS PREVORDERDATE
+FROM CTE C
+) AS T
+WHERE (PREVORDERDATE = OrderDate OR DATEDIFF(DAY,PREVORDERDATE, OrderDate)<=1);
+
+/*Show top 10 most profitable products (LineTotal − StandardCost).*/
+SELECT TOP 10 WITH TIES
+	PP.ProductID,
+	Name AS ProductName,
+	(SSOD.LineTotal - PP.StandardCost*OrderQty) AS Profit
+FROM Production.Product PP
+INNER JOIN Sales.SalesOrderDetail SSOD
+ON PP.ProductID = SSOD.ProductID
+ORDER BY Profit DESC;
+
+/*Identify salespeople whose sales dropped for 3 consecutive quarters.*/
+WITH CTE AS(
+SELECT 
+	SSOH.SalesPersonID,
+	YEAR(OrderDate) AS YR,
+	DATEPART(QUARTER,OrderDate) AS Quarter,	
+	SUM(TotalDue) AS TotalSales
+FROM Sales.SalesOrderHeader SSOH
+INNER JOIN Sales.SalesPerson SSP
+ON SSOH.SalesPersonID = SSP.BusinessEntityID
+GROUP BY SSOH.SalesPersonID,YEAR(OrderDate),DATEPART(QUARTER,OrderDate)
+)SELECT * FROM (
+SELECT *,
+	LAG(Prev) OVER (PARTITION BY SalesPersonID ORDER BY YR,Quarter) AS Prev3,
+	CASE WHEN LAG(Prev2) OVER (PARTITION BY SalesPersonID ORDER BY YR,Quarter)  > PREV2
+	AND Prev2>PREV AND PREV>TotalSales THEN 1 ELSE 0
+	END AS DECLINE
+FROM (
+SELECT
+	SalesPersonID,
+	YR,
+	TotalSales,
+	Prev,
+	QUARTER,
+	LAG(Prev) OVER (PARTITION BY SalesPersonID ORDER BY YR,Quarter) AS Prev2
+FROM (
+SELECT *,
+	LAG(TotalSales) OVER (PARTITION BY SalesPersonID ORDER BY YR,Quarter) AS Prev
+FROM CTE
+)AS T) AS T2) AS T3
+WHERE DECLINE = 1;
+
+/*Display all orders where shipping took more than 10 days from order date.*/
+SELECT * FROM Sales.SalesOrderHeader
+WHERE DATEDIFF(DAY,OrderDate,ShipDate) > 10;
+
+/*List employees who changed departments more than twice.*/
+SELECT
+	HRE.BusinessEntityID
+FROM HumanResources.Employee HRE
+INNER JOIN HumanResources.EmployeeDepartmentHistory HREDH
+ON HRE.BusinessEntityID = HREDH.BusinessEntityID
+GROUP BY HRE.BusinessEntityID
+HAVING COUNT(DISTINCT HREDH.DepartmentID) > 2;
+
+/*Find slow-moving products: not sold in last 120 days.*/
+SELECT P.ProductID, P.Name AS ProductName
+FROM Production.Product P
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Sales.SalesOrderDetail SSOD
+    INNER JOIN Sales.SalesOrderHeader SSOH
+        ON SSOD.SalesOrderID = SSOH.SalesOrderID
+    WHERE SSOD.ProductID = P.ProductID
+      AND SSOH.OrderDate > DATEADD(DAY, -120, GETDATE())
+)
+ORDER BY P.ProductID;
