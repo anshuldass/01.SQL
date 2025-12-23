@@ -1,0 +1,8 @@
+WITH CTE AS(
+SELECT DISTINCT Salary,
+    RANK() OVER (ORDER BY SALARY DESC)AS RN
+FROM Employees
+)
+SELECT 
+    MAX(Salary) AS [SecondHighestSalary]
+FROM CTE WHERE RN = 2;
