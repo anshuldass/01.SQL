@@ -1,0 +1,15 @@
+WITH CTE AS(
+SELECT 
+	U.UserId,
+	MR.MovieId,
+	ROW_NUMBER() OVER (PARTITION BY U.UserId ORDER BY MovieId) AS RNK
+FROM Users U
+LEFT JOIN MovieRatings MR
+ON U.UserId=MR.UserId
+WHERE MovieId IS NOT NULL
+)
+SELECT
+	UserId,
+	MovieId
+FROM CTE
+WHERE RNK =1;
